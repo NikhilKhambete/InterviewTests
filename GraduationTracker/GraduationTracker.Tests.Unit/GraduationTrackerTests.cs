@@ -2,25 +2,46 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using GraduationTracker.Interfaces;
 
 namespace GraduationTracker.Tests.Unit
 {
     [TestClass]
     public class GraduationTrackerTests
     {
-        [TestMethod]
-        public void TestHasCredits()
-        {
-            var tracker = new GraduationTracker();
 
-            var diploma = new Diploma
+        static IGraduationTracker tracker = new GraduationTracker();
+        static IDiploma diploma;
+        static IStudent[] allStudents;
+
+        public TestContext TestContext { get; set; }
+
+        /// <summary>
+        /// Logs TestName to The console
+        /// </summary>
+        [TestInitialize]
+        public void LogTests()
+        {
+            Console.WriteLine("TestContext.TestName = '{0}'", TestContext.TestName);
+        }
+
+        /// <summary>
+        /// Initializes the Class Level Static Variables for Referencing it throughout the class
+        /// </summary>
+        /// <param name="testContext"></param>
+        [ClassInitialize]
+        public static void Setup(TestContext testContext)
+        {
+            tracker = new GraduationTracker();
+
+            diploma = new Diploma
             {
                 Id = 1,
                 Credits = 4,
                 Requirements = new int[] { 100, 102, 103, 104 }
             };
 
-            var students = new[]
+            allStudents = new[]
             {
                new Student
                {
@@ -66,23 +87,74 @@ namespace GraduationTracker.Tests.Unit
                     new Course{Id = 4, Name = "Physichal Education", Mark=40 }
                 }
             }
+          };
+        }
 
+        /// <summary>
+        /// Clean up the class level variables
+        /// </summary>
+        [ClassCleanup]
+        public static void TestClean()
+        {
+            tracker = null;
+            diploma = null;
+            allStudents = null;
+        }
 
-            //tracker.HasGraduated()
-        };
-            
+        /// <summary>
+        /// Verify if anyone graduated by removing the ones from the list who have diploma = false
+        /// </summary>
+        [TestMethod]
+        public void TestHasGraduated()
+        {
             var graduated = new List<Tuple<bool, STANDING>>();
 
-            foreach(var student in students)
+            foreach(var student in allStudents)
             {
                 graduated.Add(tracker.HasGraduated(diploma, student));      
             }
 
-            
-            Assert.IsFalse(graduated.Any());
+            graduated = graduated.Where(x => x.Item1 == true).ToList();
+
+            Assert.AreEqual(bool.TrueString.ToUpper(), graduated.Any().ToString().ToUpper());
 
         }
 
+        /// <summary>
+        /// Verify if anyone has not graduated by removing the ones from the list who have diploma = true
+        /// Based on the mock data there is one student who has diploma = false
+        /// </summary>
+        [TestMethod]
+        public void TestHasNotGraduated()
+        {
+            var graduated = new List<Tuple<bool, STANDING>>();
 
+            graduated.Add(tracker.HasGraduated(diploma, allStudents[3]));
+
+            graduated = graduated.Where(x => x.Item1 == false).ToList();
+
+            Assert.AreEqual(bool.TrueString.ToUpper(), graduated.Any().ToString().ToUpper());
+        }
+
+        /// <summary>
+        /// Test the return values from the GetStanding Method
+        /// </summary>
+        [TestMethod]
+        public void TestGetStanding()
+        {
+            STANDING standing;
+
+            standing = tracker.GetStanding(30);
+            Assert.AreEqual("REMEDIAL", Convert.ToString(standing).ToUpper());
+
+            standing = tracker.GetStanding(55);
+            Assert.AreEqual("AVERAGE", Convert.ToString(standing).ToUpper());
+
+            standing = tracker.GetStanding(85);
+            Assert.AreEqual("SUMACUMLAUDE", Convert.ToString(standing).ToUpper());
+
+            standing = tracker.GetStanding(100);
+            Assert.AreEqual("MAGNACUMLAUDE", Convert.ToString(standing).ToUpper());
+        }
     }
 }

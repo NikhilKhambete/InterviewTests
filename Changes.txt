@@ -1,0 +1,23 @@
+Changes:
+
+-Created Classes, Interfaces & Variables folders for clean file structure
+
+-Implemented Interfaces and referred to Interfaces throughout the project instead of Class names
+
+-Fixed GraduationTracker.HasGraduated() method
+There was an incorrect code  which was always returning "Remedial".
+-Fixed code in which "SUMACUMLAUDE" wasnt getting considered. 
+-Condition to check "Average" and return standing was  fixed to consider multiple ranges from 50-95. 
+- Implemented break; to break from for loop and used Equals() instead of == for value check.
+
+-Used LinQ instead of For Loops in Repository.cs
+
+-Added 3 new tests for Repository Class methods in a new Test Class
+
+-Added new test case for GraduationTracker to test negative scenario for the user who has not graduated
+
+- The Test happens on whether the Diploma is False or True and not on Any()
+
+- Variable initialization code was added into a different method using [ClassInitialize] and cleanup code was added to method marked as [ClassCleanup].
+
+ 
